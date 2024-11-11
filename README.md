@@ -121,5 +121,5 @@ done
 This tutorial provides a complete guide for running the Dynast pipeline from raw data to count matrix output with T to C substitution, enabling RNA velocity and RNA kinetics analysis and insights into single-cell gene expression regulatory dynamics.
 
 #### Reference:
-https://dynast-release.readthedocs.io/en/latest/pipeline_usage.html
+https://dynast-release.readthedocs.io/en/latest/pipeline_usage.html \
 https://anndata.readthedocs.io/en/latest/
