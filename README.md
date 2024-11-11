@@ -9,7 +9,6 @@ Start by building the STAR index using the reference genome and annotation files
 
 ```bash
 # Build the STAR index using Dynast
-
 dynast ref -i STAR GRCm39.genome.fa.gz gencode.vM29.annotation.gtf.gz
 ```
 
@@ -22,9 +21,9 @@ dynast ref -i STAR GRCm39.genome.fa.gz gencode.vM29.annotation.gtf.gz
 Set the paths for the STAR index, GTF annotation, and fastq file directory.
 
 ```bash
-STAR_index=/mnt/data1/hongjie/reference/dropseq/gencode/gencode_mouse/release_M29/STAR
-gtf=/mnt/data1/hongjie/reference/dropseq/gencode/gencode_mouse/release_M29/gencode.vM29.annotation.gtf
-path=/mnt/data1/hongjie/project/scNTseq/E16/fastq
+STAR_index=/path/to/your/STAR_index
+gtf=/path/to/your/gtf/gencode/gencode_mouse/release_M29/gencode.vM29.annotation.gtf
+path=/path/to/your/fastq
 ```
 
 ## 3. Run Alignment, Consensus, and Counting Steps
@@ -32,10 +31,11 @@ path=/mnt/data1/hongjie/project/scNTseq/E16/fastq
 Loop through the samples to align reads, generate consensus reads, and count with Dynast.
 
 ```bash
-for sample in E16Ctx1-1_S1 E16Ctx1-2_S2 E16Ctx2-1_S3 E16Ctx2-2_S4 E16Ctx3-saline_S5; do
+for sample in sample1 sample2 sample3 control-sample;
+do
     mkdir -p consensus/${sample}
     mkdir -p align/${sample}
-    mkdir -p unCorrect_count/${sample}
+    mkdir -p count/${sample}
 
     # Align reads
     dynast align -t 16 --strand forward -i ${STAR_index} -o align/${sample} \
@@ -49,7 +49,7 @@ for sample in E16Ctx1-1_S1 E16Ctx1-2_S2 E16Ctx2-1_S3 E16Ctx2-2_S4 E16Ctx3-saline
 
     # Count reads with conversion
     dynast count -t 16 --strand forward -g ${gtf} --barcode-tag CB --umi-tag UB \
-    consensus/${sample}/consensus.bam -o unCorrect_count/${sample} --conversion TC \
+    consensus/${sample}/consensus.bam -o count/${sample} --conversion TC \
     --barcodes align/${sample}/Solo.out/Gene/filtered/barcodes.tsv
 
 done
@@ -60,7 +60,7 @@ done
 - **`dynast consensus`**: Generates consensus reads.
 - **`dynast count`**: Counts reads with specified conversion (e.g., TC).
 
-## 4. Background Correction and Control Analysis
+## 4. Background Correction use Control Sample (without 4sU labeling)
 
 Create directories for control counting and estimation.
 
@@ -68,12 +68,12 @@ Create directories for control counting and estimation.
 mkdir -p control_count
 mkdir -p control_estimate
 
-ctrlBam=/mnt/data2/hongjie/project/invivoscNTseq/data/dynast_output/E16Ctx/consensus/E16Ctx3-saline_S5/consensus.bam
+ctrlBam=/path/to/your/consensus/control-sample/consensus.bam
 
 # Perform control counting
 dynast count -t 16 --control --snp-threshold 0.5 -o control_count \
 --barcode-tag CB --umi-tag UB --conversion TC -g ${gtf} ${ctrlBam} \
---barcodes align/E16Ctx3-saline_S5/Solo.out/Gene/filtered/barcodes.tsv
+--barcodes align/control-sample/Solo.out/Gene/filtered/barcodes.tsv
 
 # Estimate the background conversion rate
 dynast estimate -t 16 --control -o control_estimate control_count
@@ -88,17 +88,19 @@ dynast estimate -t 16 --control -o control_estimate control_count
 Run alpha correction to account for background conversion rates.
 
 ```bash
-for sample in E16Ctx1-1_S1 E16Ctx1-2_S2 E16Ctx2-1_S3 E16Ctx2-2_S4; do
-    mkdir -p correct_estimate_alpha/${sample}
+for sample in sample1 sample2 sample3;
+do
+    mkdir -p estimate_count/${sample}
+    mkdir -p bgcorrect_count/${sample}
 
     # Perform count correction using control SNPs
-    dynast count -t 16 --snp-csv control_count/snps.csv -o correct_count/${sample} \
+    dynast count -t 16 --snp-csv control_count/snps.csv -o bgcorrect_count/${sample} \
     consensus/${sample}/consensus.bam -g ${gtf} --barcode-tag CB --umi-tag UB --conversion TC \
     --barcodes align/${sample}/Solo.out/Gene/filtered/barcodes.tsv
 
     # Alpha correction step
-    dynast estimate -t 16 --p-e control_estimate/p_e.csv -o correct_estimate_alpha/${sample} \
-    correct_count/${sample} --method alpha --reads total
+    dynast estimate -t 16 --p-e control_estimate/p_e.csv -o estimate_count/${sample} \
+    bgcorrect_count/${sample} --method alpha --reads total
 
 done
 ```
@@ -109,5 +111,5 @@ done
 
 ---
 
-This tutorial provides a complete guide for running the Dynast pipeline from raw data to corrected output, enabling RNA velocity analysis and insights into single-cell gene expression dynamics.
+This tutorial provides a complete guide for running the Dynast pipeline from raw data to count matrix output with T to C substitution, enabling RNA velocity and RNA Kinetics analysis and insights into single-cell gene expression dynamics.
 
