@@ -109,7 +109,17 @@ done
 - **`--snp-csv`**: Uses the control SNP CSV for correction.
 - **`--method alpha`**: Applies the alpha correction method to estimate conversion rates.
 
+## 6. Workflow and Output
+<img width="467" alt="image" src="https://github.com/user-attachments/assets/33b9d7ed-eee3-403b-98ff-4d56aa1b4f7d">
+<img width="363" alt="image" src="https://github.com/user-attachments/assets/cdab1e67-7971-433c-a951-64adee8b71fb">
+
+
+
+
 ---
 
-This tutorial provides a complete guide for running the Dynast pipeline from raw data to count matrix output with T to C substitution, enabling RNA velocity and RNA Kinetics analysis and insights into single-cell gene expression dynamics.
+This tutorial provides a complete guide for running the Dynast pipeline from raw data to count matrix output with T to C substitution, enabling RNA velocity and RNA kinetics analysis and insights into single-cell gene expression regulatory dynamics.
 
+#### Reference:
+https://dynast-release.readthedocs.io/en/latest/pipeline_usage.html
+https://anndata.readthedocs.io/en/latest/
