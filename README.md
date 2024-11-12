@@ -83,7 +83,7 @@ dynast estimate -t 16 --control -o control_estimate control_count
 - **`--control`**: Specifies control counting to generate background SNP data.
 - **`dynast estimate`**: Calculates background conversion rates and outputs to `p_e.csv`.
 
-## 5. Alpha Correction for Experimental Samples
+## 5. Background Correction and Statistical Estimation
 
 Run alpha correction to account for background conversion rates.
 
